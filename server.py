@@ -7,16 +7,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify
 import os
-
-#Clear static folder before running script 
-static_path = os.path.join(os.path.dirname(__file__), 'static')
-for filename in os.listdir(static_path):
-    file_path = os.path.join(static_path, filename)
-    try:
-        if os.path.isfile(file_path):
-            os.unlink(file_path)
-    except Exception as e:
-        print(f"Error deleting {file_path}: {str(e)}")
+from waitress import serve
 
 # --- Flask Application Setup ---
 app = Flask(__name__)
@@ -29,6 +20,16 @@ combined with a positive change in their closing price. For these identified sto
 is then retrieved and displayed, allowing for a quick overview of market momentum backed by recent news events.
 The strategy focuses on small to micro-cap stocks, aiming to capture early movements.
 """
+
+def clean_static_folder():
+    static_path = os.path.join(os.path.dirname(__file__), 'static')
+    for filename in os.listdir(static_path):
+        file_path = os.path.join(static_path, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(f"Error deleting {file_path}: {str(e)}")
 
 def process_data():
     try:
@@ -111,4 +112,7 @@ def run_strategy():
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"Starting server on port {port}...")
+    clean_static_folder()  # Clean static folder before starting server
+    serve(app, host='0.0.0.0', port=port)
