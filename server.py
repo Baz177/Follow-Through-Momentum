@@ -7,7 +7,16 @@ import yfinance as yf
 from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify
 import os
-from waitress import serve
+
+#Clear static folder before running script 
+static_path = os.path.join(os.path.dirname(__file__), 'static')
+for filename in os.listdir(static_path):
+    file_path = os.path.join(static_path, filename)
+    try:
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+    except Exception as e:
+        print(f"Error deleting {file_path}: {str(e)}")
 
 # --- Flask Application Setup ---
 app = Flask(__name__)
@@ -112,7 +121,4 @@ def run_strategy():
     return response
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    print(f"Starting server on port {port}...")
-    clean_static_folder()  # Clean static folder before starting server
-    serve(app, host='0.0.0.0', port=port)
+    app.run(debug=True)
